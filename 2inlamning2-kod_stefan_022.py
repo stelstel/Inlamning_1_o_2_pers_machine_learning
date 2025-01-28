@@ -172,7 +172,7 @@ y_test = test.drop(labels=['Id', 'Heading'], axis=1)
 
 
 #####################################################
-#  PART 1: CHOOSE A CLASSIFIER A LogisticRegression
+#  PART 1 A: CHOOSE A CLASSIFIER. LogisticRegression
 #####################################################
 """
 In this part, you will:
@@ -198,7 +198,7 @@ clf.fit(x_train, y_train)
 
 
 #####################################################
-#  PART 1: CHOOSE A CLASSIFIER B RandomForestClassifier
+#  PART 1 B: CHOOSE A CLASSIFIER. RandomForestClassifier
 #####################################################
 estimators = 100 # TODO raise the estimators value //////////////////////////////////////
 clf_rf = RandomForestClassifier(n_estimators=estimators)
@@ -206,7 +206,7 @@ clf_rf = RandomForestClassifier(n_estimators=estimators)
 
 
 #####################################################
-#  PART 1: CHOOSE A CLASSIFIER C KNeighborsClassifier
+#  PART 1 C: CHOOSE A CLASSIFIER. KNeighborsClassifier
 #####################################################
 from sklearn.neighbors import KNeighborsClassifier
 clf_knn = KNeighborsClassifier(n_neighbors=5)
