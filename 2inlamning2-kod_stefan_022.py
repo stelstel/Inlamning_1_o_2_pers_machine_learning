@@ -45,6 +45,7 @@ import os
 import platform
 
 
+################################################################################################################################
 """
 Stores the evaluation results of a classifier into a dictionary.
 
@@ -73,20 +74,18 @@ Example:
 >>> store_results("Logistic Regression", 0.92, "GridSearchCV", {"C": 1.0, "penalty": "l2"})
 {'Classifier': 'Logistic Regression', 'Accuracy': 92.0, 'Tuning Tool': 'GridSearchCV', 'Best parameters': {'C': 1.0, 'penalty': 'l2'}}
 """ 
-################################################################################################################################
 def store_results(classif, accur, tune_tool = '', best_params= ''):
     accur = float(accur) * 100 # For %
     
-    res = ( 
-        {
-            "Classifier": classif,
-            "Accuracy": accur,
-            "Tuning Tool": tune_tool,
-            "Best parameters": best_params
-        }
-    )
+    res = {
+        "Classifier": classif,
+        "Accuracy": accur,
+        "Tuning Tool": tune_tool,
+        "Best parameters": best_params
+    }
 
     return res
+################################################################################################################################
 
 
 
@@ -123,11 +122,13 @@ data_raw['Heading'] = (
 nltk.download('stopwords')
 stop_words = set(stopwords.words('swedish'))
 
+################################################################################################################################
 def removeStopWords(sentence):
     return " ".join(
         [word for word in nltk.word_tokenize(sentence) 
          if word not in stop_words]
     )
+################################################################################################################################
 
 
 
@@ -136,20 +137,6 @@ if platform.system() == "Windows":
     os.system('cls')
 
 data_raw['Heading'] = data_raw['Heading'].apply(removeStopWords)
-
-# 6. (Optional) Stemming
-# The SnowballStemmer is used for stemming words, meaning it reduces words to their root form (stamform)
-# e.g. "bilar" -> 'bil'
-# stemmer = SnowballStemmer("swedish")
-
-# def stemming(sentence):
-#     stemSentence = ""
-#     for word in sentence.split():
-#         stemSentence += stemmer.stem(word) + " "
-#     return stemSentence.strip()
-
-# If you want to apply stemming, uncomment:
-# data_raw['Heading'] = data_raw['Heading'].apply(stemming)
 
 # 7. Split the data
 train, test = train_test_split(data_raw, random_state=42, test_size=0.30, shuffle=True)
@@ -199,17 +186,17 @@ clf.fit(x_train, y_train)
 # -------------------------------------------------
 
 
-#####################################################
+########################################################
 #  PART 1 B: CHOOSE A CLASSIFIER. RandomForestClassifier
-#####################################################
+########################################################
 estimators = 100 # TODO raise the estimators value //////////////////////////////////////
 clf_rf = RandomForestClassifier(n_estimators=estimators)
 # -------------------------------------------------
 
 
-#####################################################
+######################################################
 #  PART 1 C: CHOOSE A CLASSIFIER. KNeighborsClassifier
-#####################################################
+######################################################
 from sklearn.neighbors import KNeighborsClassifier
 clf_knn = KNeighborsClassifier(n_neighbors=5)
 # -------------------------------------------------
@@ -363,6 +350,7 @@ classifier + hyperparameter combo works best for this dataset.
 # -------------------------------------------------
 
 column_with = 24
+print("Results:")
 
 # Print result headers
 for column in results[0]:
@@ -373,6 +361,7 @@ print("-" * 175)
 
 # Sort according to accuracy
 results.sort(key=lambda e: e["Accuracy"], reverse=True)  # Descending order
+
 
 # Print the result rows
 for r in results:
