@@ -45,37 +45,39 @@ import os
 import platform
 
 
-""" ################################################################################################################################
-Stores the results of a classifier's performance into a list.
+"""
+Stores the evaluation results of a classifier into a dictionary.
+
+This function formats and returns a dictionary containing details of a classifier's 
+performance, including its name, accuracy, tuning tool used, and best parameters.
 
 Parameters:
 -----------
-res : list
-    A list where the classifier's results will be appended. Each entry is a dictionary.
 classif : str
-    The name of the classifier.
+    The name of the classifier being evaluated.
 accur : float or str
-    The accuracy of the classifier, which will be converted to a percentage.
+    The accuracy score of the classifier, which is converted to a percentage.
 tune_tool : str, optional
-    The tuning tool used for hyperparameter optimization (default is an empty string).
+    The hyperparameter tuning tool used (e.g., "GridSearchCV" or "RandomizedSearchCV"). 
+    Defaults to an empty string if no tuning was applied.
 best_params : str or dict, optional
-    The best parameters found during tuning (default is an empty string).
+    The best hyperparameters found during tuning. Defaults to an empty string if tuning was not performed.
 
 Returns:
 --------
-list
-    The updated results list with the new classifier's details.
+dict
+    A dictionary containing the classifier's name, accuracy (as a percentage), tuning tool, and best parameters.
 
 Example:
 --------
->>> results = []
->>> store_results(results, "Random Forest", 0.92, "GridSearchCV", {"n_estimators": 100})
-[{'Classifier': 'Random Forest', 'Accuracy': 92.0, 'Tuning Tool': 'GridSearchCV', 'Best parameters': {'n_estimators': 100}}]
-""" ################################################################################################################################
-def store_results(res, classif, accur, tune_tool = '', best_params= ''):
+>>> store_results("Logistic Regression", 0.92, "GridSearchCV", {"C": 1.0, "penalty": "l2"})
+{'Classifier': 'Logistic Regression', 'Accuracy': 92.0, 'Tuning Tool': 'GridSearchCV', 'Best parameters': {'C': 1.0, 'penalty': 'l2'}}
+""" 
+################################################################################################################################
+def store_results(classif, accur, tune_tool = '', best_params= ''):
     accur = float(accur) * 100 # For %
     
-    res.append( 
+    res = ( 
         {
             "Classifier": classif,
             "Accuracy": accur,
@@ -272,13 +274,15 @@ You can also explore other metrics from sklearn.metrics (e.g., classification_re
 from sklearn.metrics import accuracy_score, precision_score
 
 accuracy = accuracy_score(y_test, y_pred)
-results = store_results(results, "LogisticRegression", accuracy)
+results.append(store_results("LogisticRegression", accuracy))
 
 accuracy_rf = accuracy_score(y_test, y_pred_rf)
-results = store_results(results, "RandomForestClassifier", accuracy_rf)
+results.append(store_results("RandomForestClassifier", accuracy_rf))
+
 
 accuracy_knn = accuracy_score(y_test, y_pred_knn)
-results = store_results(results, "k-Nearest Neighbors (k-NN)", accuracy_knn)
+results.append(store_results("k-Nearest Neighbors (k-NN)", accuracy_knn))
+
 
 #
 # # Possibly more metrics:
@@ -323,7 +327,8 @@ multi_logreg = MultiOutputClassifier(logreg)
 from sklearn.model_selection import GridSearchCV
 grid = GridSearchCV(multi_logreg, param_grid, cv=2, scoring='accuracy') # TODO change cv to 5+
 grid.fit(x_train, y_train)
-results = store_results(results, "LogisticRegression", grid.best_score_, "GridSearchCV", grid.best_params_)
+results.append(store_results("LogisticRegression", grid.best_score_, "GridSearchCV", grid.best_params_))
+
 
 # RandomizedSearchCV
 from sklearn.model_selection import RandomizedSearchCV
@@ -333,7 +338,8 @@ logreg = LogisticRegression(solver='liblinear')  # 'liblinear' supports L1 and L
 multi_logreg = MultiOutputClassifier(logreg)
 random_search = RandomizedSearchCV(multi_logreg, param_distributions=param_dist, n_iter=10, cv=5, scoring='accuracy', random_state=42) # TODO change cv to 5+ and n_iter to higher
 random_search.fit(x_train, y_train)
-results = store_results(results, "LogisticRegression", random_search.best_score_, "RandomizedSearchCV", random_search.best_params_)
+results.append(store_results("LogisticRegression", random_search.best_score_, "RandomizedSearchCV", random_search.best_params_))
+
 # -------------------------------------------------
 
 
