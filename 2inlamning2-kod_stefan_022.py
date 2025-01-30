@@ -374,6 +374,7 @@ classifier + hyperparameter combo works best for this dataset.
 # -------------------------------------------------
 
 column_with = 24
+table_with = 225
 print("Results:")
 
 # Print result headers
@@ -381,7 +382,7 @@ for column in results[0]:
     print(f"{column:<{column_with}}", end="\t\t")
 
 print()
-print("-" * 175)
+print("-" * table_with)
 
 # Sort according to accuracy
 results.sort(key=lambda e: e["Accuracy"], reverse=True)  # Descending order
@@ -394,5 +395,5 @@ for r in results:
     print(f'{r["Tuning Tool"]:<{column_with}}', end="\t\t")
     print(r["Best parameters"])
 
-print("-" * 175)        
+print("-" * table_with)        
 print()
