@@ -357,21 +357,6 @@ results.append(add_results("KNeighborsClassifier", grid_knn.best_score_, "GridSe
 #####################################################
 #  PART 6: COMPARE
 #####################################################
-"""
-If you try multiple classifiers (LogisticRegression, SVC, Random Forest, etc.), 
-you can compare their performance. Keep track of the metrics and see which 
-classifier + hyperparameter combo works best for this dataset.
-"""
-
-# Your CODE HERE:
-# -------------------------------------------------
-# e.g.,
-# classifiers = [LogisticRegression(...), SVC(...), RandomForestClassifier(...)]
-# for model in classifiers:
-#     ...
-#     Evaluate
-#     ...
-# -------------------------------------------------
 
 column_with = 24
 table_with = 225
