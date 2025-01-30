@@ -43,7 +43,11 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.ensemble import RandomForestClassifier
 import os
 import platform
+import time
+import math
 
+# Save timestamp
+start_time = time.time()
 
 ################################################################################################################################
 """
@@ -389,10 +393,42 @@ results.append(add_results(
     random_search_rf.best_params_
 ))
 
-# Print the best parameters
-print("Best parameters found for RandomForestClassifier:", random_search_rf.best_params_)
 
+# RandomForestClassifier, GridSearchCV ##################################################################
 
+from sklearn.model_selection import GridSearchCV
+
+# Define parameter grid for GridSearchCV
+param_grid_rf = {
+    'n_estimators': [100, 200, 300],  # Number of trees
+    'max_depth': [None, 10, 20, 30],  # Maximum depth
+    'min_samples_split': [2, 5, 10],  # Minimum number of samples to split
+    'min_samples_leaf': [1, 2, 4],  # Minimum samples per leaf
+    'bootstrap': [True, False]  # Whether bootstrap samples are used
+}
+
+# Initialize the base RandomForestClassifier
+clf_rf_base = RandomForestClassifier(random_state=42)
+
+# GridSearchCV setup
+grid_search_rf = GridSearchCV(
+    clf_rf_base,
+    param_grid=param_grid_rf,
+    cv=5,  # 5-fold cross-validation
+    scoring='accuracy',
+    n_jobs=-1  # Use all available cores
+)
+
+# Fit the GridSearchCV model
+grid_search_rf.fit(x_train, y_train)
+
+# Store results
+results.append(add_results(
+    "RandomForestClassifier",
+    grid_search_rf.best_score_,
+    "GridSearchCV",
+    grid_search_rf.best_params_
+))
 
 # -------------------------------------------------
 
@@ -402,7 +438,7 @@ print("Best parameters found for RandomForestClassifier:", random_search_rf.best
 #####################################################
 
 column_with = 24
-table_with = 225
+table_with = 235
 print("Results:")
 
 # Print result headers
@@ -423,5 +459,15 @@ for r in results:
     print(f'{r["Tuning Tool"]:<{column_with}}', end="\t\t")
     print(r["Best parameters"])
 
-print("-" * table_with)        
+print("-" * table_with) 
+print()
+
+# Save timestamp
+end_time = time.time()
+
+time_seconds = end_time - start_time
+minutes = math.floor(time_seconds / 60)  # Get the whole minutes
+seconds = int(time_seconds % 60)  # Get the remaining whole seconds
+
+print(f"Time consumed = {minutes} min {seconds} sec")
 print()
