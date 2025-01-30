@@ -71,10 +71,10 @@ dict
 
 Example:
 --------
->>> store_results("Logistic Regression", 0.92, "GridSearchCV", {"C": 1.0, "penalty": "l2"})
+>>> add_results("Logistic Regression", 0.92, "GridSearchCV", {"C": 1.0, "penalty": "l2"})
 {'Classifier': 'Logistic Regression', 'Accuracy': 92.0, 'Tuning Tool': 'GridSearchCV', 'Best parameters': {'C': 1.0, 'penalty': 'l2'}}
 """ 
-def store_results(classif, accur, tune_tool = '', best_params= ''):
+def add_results(classif, accur, tune_tool = '', best_params= ''):
     accur = float(accur) * 100 # For %
     
     res = {
@@ -261,14 +261,14 @@ You can also explore other metrics from sklearn.metrics (e.g., classification_re
 from sklearn.metrics import accuracy_score, precision_score
 
 accuracy = accuracy_score(y_test, y_pred)
-results.append(store_results("LogisticRegression", accuracy))
+results.append(add_results("LogisticRegression", accuracy))
 
 accuracy_rf = accuracy_score(y_test, y_pred_rf)
-results.append(store_results("RandomForestClassifier", accuracy_rf))
+results.append(add_results("RandomForestClassifier", accuracy_rf))
 
 
 accuracy_knn = accuracy_score(y_test, y_pred_knn)
-results.append(store_results("k-Nearest Neighbors (k-NN)", accuracy_knn))
+results.append(add_results("k-Nearest Neighbors (k-NN)", accuracy_knn))
 
 
 #
@@ -307,17 +307,17 @@ best_clf.fit(x_train, y_train)
 Proceed to evaluate as in PART 4.
 """
 
-# GridSearchCV
+# LogisticRegression, GridSearchCV
 param_grid = {'estimator__C': [0.1, 1, 10], 'estimator__penalty': ['l1', 'l2']}
 logreg = LogisticRegression(solver='liblinear')  # 'liblinear' supports L1 and L2 penalties
 multi_logreg = MultiOutputClassifier(logreg)
 from sklearn.model_selection import GridSearchCV
 grid = GridSearchCV(multi_logreg, param_grid, cv=2, scoring='accuracy') # TODO change cv to 5+
 grid.fit(x_train, y_train)
-results.append(store_results("LogisticRegression", grid.best_score_, "GridSearchCV", grid.best_params_))
+results.append(add_results("LogisticRegression", grid.best_score_, "GridSearchCV", grid.best_params_))
 
 
-# RandomizedSearchCV
+# LogisticRegression, RandomizedSearchCV
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import uniform
 param_dist = {'estimator__C': [0.1, 1, 10], 'estimator__penalty': ['l1', 'l2']}
@@ -325,7 +325,31 @@ logreg = LogisticRegression(solver='liblinear')  # 'liblinear' supports L1 and L
 multi_logreg = MultiOutputClassifier(logreg)
 random_search = RandomizedSearchCV(multi_logreg, param_distributions=param_dist, n_iter=10, cv=5, scoring='accuracy', random_state=42) # TODO change cv to 5+ and n_iter to higher
 random_search.fit(x_train, y_train)
-results.append(store_results("LogisticRegression", random_search.best_score_, "RandomizedSearchCV", random_search.best_params_))
+results.append(add_results("LogisticRegression", random_search.best_score_, "RandomizedSearchCV", random_search.best_params_))
+
+
+# KNeighborsClassifier, GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import GridSearchCV
+
+# Define parameter grid for KNN
+param_grid_knn = {
+    'estimator__n_neighbors': [3, 5, 7, 9],  # Number of neighbors to try
+    'estimator__weights': ['uniform', 'distance'],  # Weighting strategy
+    'estimator__metric': ['euclidean', 'manhattan', 'minkowski']  # Distance metrics
+}
+
+# Initialize MultiOutputClassifier with KNeighborsClassifier
+knn = KNeighborsClassifier()
+multi_knn = MultiOutputClassifier(knn)
+
+# Perform GridSearchCV
+grid_knn = GridSearchCV(multi_knn, param_grid_knn, cv=2, scoring='accuracy')  # TODO change cv to 5+
+grid_knn.fit(x_train, y_train)
+
+# Store the results
+results.append(add_results("KNeighborsClassifier", grid_knn.best_score_, "GridSearchCV", grid_knn.best_params_))
+
 
 # -------------------------------------------------
 
