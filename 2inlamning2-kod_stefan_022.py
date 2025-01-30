@@ -307,7 +307,7 @@ best_clf.fit(x_train, y_train)
 Proceed to evaluate as in PART 4.
 """
 
-# LogisticRegression, GridSearchCV
+# LogisticRegression, GridSearchCV #################################################################################
 param_grid = {'estimator__C': [0.1, 1, 10], 'estimator__penalty': ['l1', 'l2']}
 logreg = LogisticRegression(solver='liblinear')  # 'liblinear' supports L1 and L2 penalties
 multi_logreg = MultiOutputClassifier(logreg)
@@ -317,7 +317,7 @@ grid.fit(x_train, y_train)
 results.append(add_results("LogisticRegression", grid.best_score_, "GridSearchCV", grid.best_params_))
 
 
-# LogisticRegression, RandomizedSearchCV
+# LogisticRegression, RandomizedSearchCV ##################################################################################################################################################
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import uniform
 param_dist = {'estimator__C': [0.1, 1, 10], 'estimator__penalty': ['l1', 'l2']}
@@ -328,7 +328,7 @@ random_search.fit(x_train, y_train)
 results.append(add_results("LogisticRegression", random_search.best_score_, "RandomizedSearchCV", random_search.best_params_))
 
 
-# KNeighborsClassifier, GridSearchCV
+# KNeighborsClassifier, GridSearchCV ############################################################################
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 
@@ -349,6 +349,49 @@ grid_knn.fit(x_train, y_train)
 
 # Store the results
 results.append(add_results("KNeighborsClassifier", grid_knn.best_score_, "GridSearchCV", grid_knn.best_params_))
+
+
+# RandomForestClassifier, RandomizedSearchCV ##########################################################################################################
+from sklearn.model_selection import RandomizedSearchCV
+from scipy.stats import randint
+
+# Define parameter distributions for RandomizedSearchCV
+param_dist_rf = {
+    'n_estimators': randint(50, 300),  # Number of trees in the forest
+    'max_depth': [None, 10, 20, 30, 40, 50],  # Maximum depth of trees
+    'min_samples_split': randint(2, 10),  # Minimum number of samples required to split
+    'min_samples_leaf': randint(1, 5),  # Minimum number of samples per leaf node
+    'bootstrap': [True, False]  # Whether bootstrap samples are used
+}
+
+# Initialize the base RandomForestClassifier
+clf_rf_base = RandomForestClassifier(random_state=42)
+
+# RandomizedSearchCV setup
+random_search_rf = RandomizedSearchCV(
+    clf_rf_base,
+    param_distributions=param_dist_rf,
+    n_iter=20,  # Number of parameter settings sampled
+    cv=5,  # Cross-validation splits (adjust as needed)
+    scoring='accuracy',
+    random_state=42,
+    n_jobs=-1  # Use all available cores
+)
+
+# Fit the RandomizedSearchCV model
+random_search_rf.fit(x_train, y_train)
+
+# Store results
+results.append(add_results(
+    "RandomForestClassifier",
+    random_search_rf.best_score_,
+    "RandomizedSearchCV",
+    random_search_rf.best_params_
+))
+
+# Print the best parameters
+print("Best parameters found for RandomForestClassifier:", random_search_rf.best_params_)
+
 
 
 # -------------------------------------------------
