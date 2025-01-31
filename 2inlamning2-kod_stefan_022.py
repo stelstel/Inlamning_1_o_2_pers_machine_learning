@@ -62,8 +62,8 @@ from scipy.stats import randint
 start_time = time.time()
 
 # Set to True if more parameters are needed for the evaluation.
-# When set to False -> Time consumed = 2 min 3 sec on my computer //Stefan
-# When set to True -> Time consumed = 3 min 7 sec on my computer //Stefan
+# When set to False -> Time consumed = 2 min 4 sec on my computer //Stefan
+# When set to True -> Time consumed = 3 min 2 sec on my computer //Stefan
 # False -> faster
 # True -> slower, better (?)
 high_parameter_values = True
