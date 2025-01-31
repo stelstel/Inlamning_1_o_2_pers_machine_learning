@@ -39,7 +39,7 @@ start_time = time.time()
 # When set to False -> Time consumed = 4 min 58 sec on my computer //Stefan
 # False -> faster
 # True -> slower, better
-high_parameter_values = False
+high_parameter_values = True
 
 ################################################################################################################################
 def add_results(id, classif, accur, tune_tool = '', best_params= ''):
@@ -194,9 +194,9 @@ clf.fit(x_train, y_train)
 #  PART 1 B: CHOOSE A CLASSIFIER. RandomForestClassifier
 ########################################################
 if(high_parameter_values):
-    estimators = 100
-else:
     estimators = 200
+else:
+    estimators = 100
 
 clf_rf = RandomForestClassifier(n_estimators=estimators)
 # -------------------------------------------------
@@ -206,9 +206,9 @@ clf_rf = RandomForestClassifier(n_estimators=estimators)
 #  PART 1 C: CHOOSE A CLASSIFIER. KNeighborsClassifier
 ######################################################
 if(high_parameter_values):
-    clf_knn = KNeighborsClassifier(n_neighbors=5)
-else:
     clf_knn = KNeighborsClassifier(n_neighbors=9)
+else:
+    clf_knn = KNeighborsClassifier(n_neighbors=5)
 
 # -------------------------------------------------
 
@@ -286,9 +286,9 @@ multi_knn = MultiOutputClassifier(knn)
 
 # Perform GridSearchCV
 if(high_parameter_values):
-    grid_knn = GridSearchCV(multi_knn, param_grid_knn, cv=5, scoring='accuracy')
-else:
     grid_knn = GridSearchCV(multi_knn, param_grid_knn, cv=10, scoring='accuracy')
+else:
+    grid_knn = GridSearchCV(multi_knn, param_grid_knn, cv=5, scoring='accuracy')
 grid_knn.fit(x_train, y_train)
 
 # Store the results
