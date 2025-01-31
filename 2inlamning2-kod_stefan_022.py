@@ -34,6 +34,11 @@ import warnings
 import nltk
 import pandas as pd
 import numpy as np
+import os
+import platform
+import time
+import math
+
 from nltk.corpus import stopwords
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.model_selection import train_test_split
@@ -41,10 +46,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.ensemble import RandomForestClassifier
-import os
-import platform
-import time
-import math
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, precision_score
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
+from scipy.stats import uniform
+from scipy.stats import randint
+
 
 # Save timestamp
 start_time = time.time()
@@ -201,7 +209,6 @@ clf_rf = RandomForestClassifier(n_estimators=estimators)
 ######################################################
 #  PART 1 C: CHOOSE A CLASSIFIER. KNeighborsClassifier
 ######################################################
-from sklearn.neighbors import KNeighborsClassifier
 clf_knn = KNeighborsClassifier(n_neighbors=5)
 # -------------------------------------------------
 
@@ -262,8 +269,6 @@ print("Accuracy:", accuracy)
 You can also explore other metrics from sklearn.metrics (e.g., classification_report).
 """
 
-from sklearn.metrics import accuracy_score, precision_score
-
 accuracy = accuracy_score(y_test, y_pred)
 results.append(add_results("LogisticRegression", accuracy))
 
@@ -315,15 +320,12 @@ Proceed to evaluate as in PART 4.
 param_grid = {'estimator__C': [0.1, 1, 10], 'estimator__penalty': ['l1', 'l2']}
 logreg = LogisticRegression(solver='liblinear')  # 'liblinear' supports L1 and L2 penalties
 multi_logreg = MultiOutputClassifier(logreg)
-from sklearn.model_selection import GridSearchCV
 grid = GridSearchCV(multi_logreg, param_grid, cv=2, scoring='accuracy') # TODO change cv to 5+
 grid.fit(x_train, y_train)
 results.append(add_results("LogisticRegression", grid.best_score_, "GridSearchCV", grid.best_params_))
 
 
 # LogisticRegression, RandomizedSearchCV ##################################################################################################################################################
-from sklearn.model_selection import RandomizedSearchCV
-from scipy.stats import uniform
 param_dist = {'estimator__C': [0.1, 1, 10], 'estimator__penalty': ['l1', 'l2']}
 logreg = LogisticRegression(solver='liblinear')  # 'liblinear' supports L1 and L2 penalties
 multi_logreg = MultiOutputClassifier(logreg)
@@ -333,8 +335,6 @@ results.append(add_results("LogisticRegression", random_search.best_score_, "Ran
 
 
 # KNeighborsClassifier, GridSearchCV ############################################################################
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV
 
 # Define parameter grid for KNN
 param_grid_knn = {
@@ -356,8 +356,6 @@ results.append(add_results("KNeighborsClassifier", grid_knn.best_score_, "GridSe
 
 
 # RandomForestClassifier, RandomizedSearchCV ##########################################################################################################
-from sklearn.model_selection import RandomizedSearchCV
-from scipy.stats import randint
 
 # Define parameter distributions for RandomizedSearchCV
 param_dist_rf = {
@@ -395,8 +393,6 @@ results.append(add_results(
 
 
 # RandomForestClassifier, GridSearchCV ##################################################################
-
-from sklearn.model_selection import GridSearchCV
 
 # Define parameter grid for GridSearchCV
 param_grid_rf = {
