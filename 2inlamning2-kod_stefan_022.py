@@ -1,11 +1,37 @@
 """
 =================================================
-  TEXT CLASSIFICATION WITH MULTI-OUTPUT MODELS
+  TEXT CLASSIFICATION PIPELINE FOR MULTI-OUTPUT TASKS
 =================================================
-This script demonstrates a text classification pipeline using machine learning, with a focus on multi-output classification tasks. The following steps are performed:
+This script demonstrates the implementation of a text classification pipeline for multi-output classification tasks. The main steps of the process include:
+
+1. **Data Preprocessing**:
+    - The dataset is loaded from a CSV file, shuffled, and cleaned. The "Heading" column is processed by removing stop words and unnecessary characters (such as punctuation and digits).
+
+2. **Feature Engineering**:
+    - The "Heading" column is vectorized using the TF-IDF (Term Frequency-Inverse Document Frequency) method, which transforms text data into numerical features suitable for machine learning models.
+
+3. **Classifier Selection**:
+    - Three different classifiers are used to train models on the dataset: 
+        1. Logistic Regression (using `MultiOutputClassifier`)
+        2. Random Forest Classifier
+        3. k-Nearest Neighbors (KNN) Classifier
+    
+    - Hyperparameters for these classifiers are also fine-tuned using both **Grid Search** and **Randomized Search** techniques.
+
+4. **Model Evaluation**:
+    - The models are evaluated using accuracy as the performance metric, and the results are stored for comparison.
+
+5. **Hyperparameter Tuning**:
+    - Hyperparameter optimization is performed on all classifiers using `GridSearchCV` and `RandomizedSearchCV` to find the best possible model configuration.
+
+6. **Results**:
+    - The script outputs the results of the classifier performances, including the accuracy and hyperparameters used.
+
+The script also provides functionality for evaluating multiple classifiers and comparing their performance to select the best one based on accuracy.
 
 Author: Stefan Elmgren
 """
+
 
 import re
 import sys
@@ -45,32 +71,40 @@ high_parameter_values = True
 ################################################################################################################################
 def add_results(id, classif, accur, tune_tool = '', best_params= ''):
     """
-    Stores the evaluation results of a classifier into a dictionary.
-
-    This function formats and returns a dictionary containing details of a classifier's 
-    performance, including its name, accuracy, tuning tool used, and best parameters.
+    Adds classification results to a dictionary with relevant details.
 
     Parameters:
     -----------
+    id : int or str
+        A unique identifier for the result (e.g., an ID number or string).
+        
     classif : str
-        The name of the classifier being evaluated.
-    accur : float or str
-        The accuracy score of the classifier, which is converted to a percentage.
-    tune_tool : str, optional
-        The hyperparameter tuning tool used (e.g., "GridSearchCV" or "RandomizedSearchCV"). 
-        Defaults to an empty string if no tuning was applied.
-    best_params : str or dict, optional
-        The best hyperparameters found during tuning. Defaults to an empty string if tuning was not performed.
+        The name or type of classifier used for the model (e.g., 'RandomForestClassifier').
+        
+    accur : float
+        The accuracy of the classifier, provided as a decimal value (e.g., 0.85 for 85%).
+        
+    tune_tool : str, optional (default='')
+        The tuning tool used for hyperparameter tuning (e.g., 'GridSearchCV'). Default is an empty string if no tool was used.
+        
+    best_params : dict or str, optional (default='')
+        The best parameters found during the tuning process, passed as a dictionary or string (e.g., `{'n_estimators': 200, 'max_depth': 10}`). Default is an empty string if no parameters were provided.
 
     Returns:
     --------
     dict
-        A dictionary containing the classifier's name, accuracy (as a percentage), tuning tool, and best parameters.
+        A dictionary containing the following keys:
+        - "ID": The provided identifier.
+        - "Classifier": The name of the classifier used.
+        - "Accuracy": The accuracy of the classifier, multiplied by 100 to represent percentage.
+        - "Tuning Tool": The tuning tool used (if any).
+        - "Best parameters": The best parameters from the tuning process (if any).
 
     Example:
     --------
-    >>> add_results("Logistic Regression", 0.92, "GridSearchCV", {"C": 1.0, "penalty": "l2"})
-    {'Classifier': 'Logistic Regression', 'Accuracy': 92.0, 'Tuning Tool': 'GridSearchCV', 'Best parameters': {'C': 1.0, 'penalty': 'l2'}}
+    result = add_results(1, 'RandomForestClassifier', 0.85, 'GridSearchCV', {'n_estimators': 100, 'max_depth': 20})
+    print(result)
+    # Output: {'ID': 1, 'Classifier': 'RandomForestClassifier', 'Accuracy': 85.0, 'Tuning Tool': 'GridSearchCV', 'Best parameters': {'n_estimators': 100, 'max_depth': 20}}
     """
 
     accur = float(accur) * 100 # For %
