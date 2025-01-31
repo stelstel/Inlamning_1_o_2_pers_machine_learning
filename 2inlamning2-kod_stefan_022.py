@@ -4,28 +4,7 @@
 =================================================
 This script demonstrates a text classification pipeline using machine learning, with a focus on multi-output classification tasks. The following steps are performed:
 
-1. Load data from a CSV file (Book1.csv).
-2. Preprocess text data by cleaning, tokenizing, and removing stopwords.
-3. Optionally, apply stemming to the text data.
-4. Split the dataset into training and testing sets.
-5. Transform text data into TF-IDF features.
-6. Train multiple machine learning models on the processed text data:
-    - Logistic Regression (multi-output classification)
-    - Random Forest Classifier
-    - k-Nearest Neighbors Classifier
-7. Evaluate the models based on accuracy and store the results.
-8. Tune hyperparameters using GridSearchCV and RandomizedSearchCV.
-9. Compare the performance of the models.
-
-At the end of the script, the following results are generated:
-    - Model performance (accuracy)
-    - Hyperparameter tuning details (if applicable)
-    - Comparison of models based on accuracy and other metrics.
-
-Tasks:
-- Implement classifiers and evaluate their performance.
-- Optimize models using hyperparameter tuning.
-- Compare multiple classifiers to select the best-performing model.
+Author: Stefan Elmgren
 """
 
 import re
@@ -53,40 +32,40 @@ from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import uniform
 from scipy.stats import randint
 
-
 # Save timestamp
 start_time = time.time()
 
 ################################################################################################################################
-"""
-Stores the evaluation results of a classifier into a dictionary.
-
-This function formats and returns a dictionary containing details of a classifier's 
-performance, including its name, accuracy, tuning tool used, and best parameters.
-
-Parameters:
------------
-classif : str
-    The name of the classifier being evaluated.
-accur : float or str
-    The accuracy score of the classifier, which is converted to a percentage.
-tune_tool : str, optional
-    The hyperparameter tuning tool used (e.g., "GridSearchCV" or "RandomizedSearchCV"). 
-    Defaults to an empty string if no tuning was applied.
-best_params : str or dict, optional
-    The best hyperparameters found during tuning. Defaults to an empty string if tuning was not performed.
-
-Returns:
---------
-dict
-    A dictionary containing the classifier's name, accuracy (as a percentage), tuning tool, and best parameters.
-
-Example:
---------
->>> add_results("Logistic Regression", 0.92, "GridSearchCV", {"C": 1.0, "penalty": "l2"})
-{'Classifier': 'Logistic Regression', 'Accuracy': 92.0, 'Tuning Tool': 'GridSearchCV', 'Best parameters': {'C': 1.0, 'penalty': 'l2'}}
-""" 
 def add_results(classif, accur, tune_tool = '', best_params= ''):
+    """
+    Stores the evaluation results of a classifier into a dictionary.
+
+    This function formats and returns a dictionary containing details of a classifier's 
+    performance, including its name, accuracy, tuning tool used, and best parameters.
+
+    Parameters:
+    -----------
+    classif : str
+        The name of the classifier being evaluated.
+    accur : float or str
+        The accuracy score of the classifier, which is converted to a percentage.
+    tune_tool : str, optional
+        The hyperparameter tuning tool used (e.g., "GridSearchCV" or "RandomizedSearchCV"). 
+        Defaults to an empty string if no tuning was applied.
+    best_params : str or dict, optional
+        The best hyperparameters found during tuning. Defaults to an empty string if tuning was not performed.
+
+    Returns:
+    --------
+    dict
+        A dictionary containing the classifier's name, accuracy (as a percentage), tuning tool, and best parameters.
+
+    Example:
+    --------
+    >>> add_results("Logistic Regression", 0.92, "GridSearchCV", {"C": 1.0, "penalty": "l2"})
+    {'Classifier': 'Logistic Regression', 'Accuracy': 92.0, 'Tuning Tool': 'GridSearchCV', 'Best parameters': {'C': 1.0, 'penalty': 'l2'}}
+    """
+
     accur = float(accur) * 100 # For %
     
     res = {
@@ -97,6 +76,37 @@ def add_results(classif, accur, tune_tool = '', best_params= ''):
     }
 
     return res
+################################################################################################################################
+
+
+
+################################################################################################################################
+def removeStopWords(sentence):
+    """
+    Removes stop words from a given sentence.
+
+    Parameters:
+    sentence (str): The input sentence from which stop words should be removed.
+
+    Returns:
+    str: The sentence with stop words removed.
+    
+    Dependencies:
+    - Requires `nltk.word_tokenize` for tokenization.
+    - Assumes `stop_words` is a predefined set or list of stop words.
+    
+    Example:
+    >>> import nltk
+    >>> nltk.download('punkt')
+    >>> stop_words = {"the", "is", "in", "and"}  # Example stop words
+    >>> removeStopWords("The cat is in the garden")
+    'cat garden'
+    """
+
+    return " ".join(
+        [word for word in nltk.word_tokenize(sentence) 
+         if word not in stop_words]
+    )
 ################################################################################################################################
 
 
@@ -134,16 +144,6 @@ data_raw['Heading'] = (
 nltk.download('stopwords')
 stop_words = set(stopwords.words('swedish'))
 
-################################################################################################################################
-def removeStopWords(sentence):
-    return " ".join(
-        [word for word in nltk.word_tokenize(sentence) 
-         if word not in stop_words]
-    )
-################################################################################################################################
-
-
-
 # Clearing the Screen
 if platform.system() == "Windows":
     os.system('cls')
@@ -175,24 +175,6 @@ y_test = test.drop(labels=['Id', 'Heading'], axis=1)
 #####################################################
 #  PART 1 A: CHOOSE A CLASSIFIER. LogisticRegression
 #####################################################
-"""
-In this part, you will:
-1. Import or define the classification algorithm(s) you want to try.
-2. Examples: LogisticRegression, MultinomialNB (Naive Bayes), SVC, RandomForestClassifier, etc.
-3. You can handle multi-label classification if the dataset requires it
-   (e.g., OneVsRestClassifier, MultiOutputClassifier, etc.).
-
-Code outline might look like:
-
-from sklearn.linear_model import LogisticRegression
-clf = LogisticRegression()
-# or
-from sklearn.ensemble import RandomForestClassifier
-clf = RandomForestClassifier()
-
-Feel free to experiment with multiple classifiers.
-"""
-
 clf = MultiOutputClassifier(LogisticRegression(max_iter=500)) # TODO raise the max_iter value //////////////////////////////////////
 clf.fit(x_train, y_train)
 # -------------------------------------------------
@@ -216,16 +198,6 @@ clf_knn = KNeighborsClassifier(n_neighbors=5)
 #####################################################
 #  PART 2: TRAIN YOUR MODEL
 #####################################################
-"""
-Now, train (fit) your chosen classifier on (x_train, y_train).
-
-Example:
-
-clf.fit(x_train, y_train)
-
-After this step, your model will be "trained" on the training data.
-"""
-
 clf.fit(x_train, y_train)
 clf_rf.fit(x_train, y_train)
 clf_knn.fit(x_train, y_train)
@@ -235,17 +207,9 @@ clf_knn.fit(x_train, y_train)
 #####################################################
 #  PART 3: MAKE PREDICTIONS
 #####################################################
-"""
-Use your trained model to predict labels on the test set (x_test).
-Store the predictions in a variable, e.g. y_pred.
-"""
-
-# Your CODE HERE:
-# -------------------------------------------------
 y_pred = clf.predict(x_test)
 y_pred_rf = clf_rf.predict(x_test)
 y_pred_knn = clf_knn.predict(x_test)
-
 # -------------------------------------------------
 
 results = []
@@ -253,68 +217,18 @@ results = []
 #####################################################
 #  PART 4: EVALUATE PERFORMANCE
 #####################################################
-"""
-Now evaluate how well your model performs using metrics such as:
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- Confusion matrix, if relevant.
-
-Example with accuracy:
-from sklearn.metrics import accuracy_score
-accuracy = accuracy_score(y_test, y_pred)
-print("Accuracy:", accuracy)
-
-You can also explore other metrics from sklearn.metrics (e.g., classification_report).
-"""
-
 accuracy = accuracy_score(y_test, y_pred)
 results.append(add_results("LogisticRegression", accuracy))
 
 accuracy_rf = accuracy_score(y_test, y_pred_rf)
 results.append(add_results("RandomForestClassifier", accuracy_rf))
 
-
 accuracy_knn = accuracy_score(y_test, y_pred_knn)
 results.append(add_results("k-Nearest Neighbors (k-NN)", accuracy_knn))
-
-
-#
-# # Possibly more metrics:
-# from sklearn.metrics import classification_report
-# print(classification_report(y_test, y_pred))
-# -------------------------------------------------
-
 
 #####################################################
 #  PART 5: TUNE HYPERPARAMETERS
 #####################################################
-"""
-Use GridSearchCV or RandomizedSearchCV to find the best parameters
-for your chosen classifier.
-
-Example:
-
-from sklearn.model_selection import GridSearchCV
-
-param_grid = {'C': [0.1, 1, 10], 'penalty': ['l1', 'l2']}
-clf_base = LogisticRegression(solver='liblinear') 
-# (solver='liblinear' helps with small data or L1 penalty)
-
-grid = GridSearchCV(clf_base, param_grid, cv=5, scoring='accuracy')
-grid.fit(x_train, y_train)
-
-print("Best params: ", grid.best_params_)
-print("Best score: ", grid.best_score_)
-
-Then retrain your final model using these best params:
-
-best_clf = grid.best_estimator_
-best_clf.fit(x_train, y_train)
-
-Proceed to evaluate as in PART 4.
-"""
 
 # LogisticRegression, GridSearchCV #################################################################################
 param_grid = {'estimator__C': [0.1, 1, 10], 'estimator__penalty': ['l1', 'l2']}
