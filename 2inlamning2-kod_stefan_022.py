@@ -42,7 +42,7 @@ start_time = time.time()
 high_parameter_values = False
 
 ################################################################################################################################
-def add_results(classif, accur, tune_tool = '', best_params= ''):
+def add_results(id, classif, accur, tune_tool = '', best_params= ''):
     """
     Stores the evaluation results of a classifier into a dictionary.
 
@@ -75,6 +75,7 @@ def add_results(classif, accur, tune_tool = '', best_params= ''):
     accur = float(accur) * 100 # For %
     
     res = {
+        "ID" : id,
         "Classifier": classif,
         "Accuracy": accur,
         "Tuning Tool": tune_tool,
@@ -235,13 +236,13 @@ results = []
 #  PART 4: EVALUATE PERFORMANCE
 #####################################################
 accuracy = accuracy_score(y_test, y_pred)
-results.append(add_results("LogisticRegression", accuracy))
+results.append(add_results(1, "LogisticRegression", accuracy))
 
 accuracy_rf = accuracy_score(y_test, y_pred_rf)
-results.append(add_results("RandomForestClassifier", accuracy_rf))
+results.append(add_results(2, "RandomForestClassifier", accuracy_rf))
 
 accuracy_knn = accuracy_score(y_test, y_pred_knn)
-results.append(add_results("k-Nearest Neighbors (k-NN)", accuracy_knn))
+results.append(add_results(3, "k-Nearest Neighbors (k-NN)", accuracy_knn))
 
 #####################################################
 #  PART 5: TUNE HYPERPARAMETERS
@@ -253,7 +254,7 @@ logreg = LogisticRegression(solver='liblinear')  # 'liblinear' supports L1 and L
 multi_logreg = MultiOutputClassifier(logreg)
 grid = GridSearchCV(multi_logreg, param_grid, cv=2, scoring='accuracy') # TODO change cv to 5+
 grid.fit(x_train, y_train)
-results.append(add_results("LogisticRegression", grid.best_score_, "GridSearchCV", grid.best_params_))
+results.append(add_results(4, "LogisticRegression", grid.best_score_, "GridSearchCV", grid.best_params_))
 
 
 # LogisticRegression, RandomizedSearchCV ##################################################################################################################################################
@@ -267,7 +268,7 @@ else:
         random_search = RandomizedSearchCV(multi_logreg, param_distributions=param_dist, n_iter=10, cv=5, scoring='accuracy', random_state=42)
 
 random_search.fit(x_train, y_train)
-results.append(add_results("LogisticRegression", random_search.best_score_, "RandomizedSearchCV", random_search.best_params_))
+results.append(add_results(5, "LogisticRegression", random_search.best_score_, "RandomizedSearchCV", random_search.best_params_))
 
 
 # KNeighborsClassifier, GridSearchCV ############################################################################
@@ -291,7 +292,7 @@ else:
 grid_knn.fit(x_train, y_train)
 
 # Store the results
-results.append(add_results("KNeighborsClassifier", grid_knn.best_score_, "GridSearchCV", grid_knn.best_params_))
+results.append(add_results(6, "KNeighborsClassifier", grid_knn.best_score_, "GridSearchCV", grid_knn.best_params_))
 
 
 # RandomForestClassifier, RandomizedSearchCV ##########################################################################################################
@@ -324,6 +325,7 @@ random_search_rf.fit(x_train, y_train)
 
 # Store results
 results.append(add_results(
+    7,
     "RandomForestClassifier",
     random_search_rf.best_score_,
     "RandomizedSearchCV",
@@ -334,21 +336,13 @@ results.append(add_results(
 # RandomForestClassifier, GridSearchCV ##################################################################
 
 # Define parameter grid for GridSearchCV
-if(high_parameter_values):
-    param_grid_rf = {
-        'n_estimators': [100, 200, 300],  # Number of trees
-        'max_depth': [None, 10, 20, 30],  # Maximum depth
-        'min_samples_split': [2, 5, 10],  # Minimum number of samples to split
-        'min_samples_leaf': [1, 2, 4],  # Minimum samples per leaf
-    }
-else:
-    param_grid_rf = {
-        'n_estimators': [100, 200],  # Number of trees
-        'max_depth': [None, 10, 20],  # Maximum depth
-        'min_samples_split': [2, 5],  # Minimum number of samples to split
-        'min_samples_leaf': [1, 2],  # Minimum samples per leaf
-        'bootstrap': [True, False]  # Whether bootstrap samples are used
-    }
+param_grid_rf = {
+    'n_estimators': [100, 200],  # Number of trees
+    'max_depth': [10, 20],  # Maximum depth
+    'min_samples_split': [5, 10],  # Minimum number of samples to split
+    'min_samples_leaf': [2, 4],  # Minimum samples per leaf
+    'bootstrap': [True, False]  # Whether bootstrap samples are used
+}
 
 # Initialize the base RandomForestClassifier
 clf_rf_base = RandomForestClassifier(random_state=42)
@@ -367,22 +361,23 @@ else:
         clf_rf_base,
         param_grid=param_grid_rf,
         cv=5,  # 5-fold cross-validation
-        scoring='roc_auc',
+        scoring='accuracy',
         n_jobs=-1  # Use all available cores
     )
-
-
 
 # Fit the GridSearchCV model
 grid_search_rf.fit(x_train, y_train)
 
 # Store results
-results.append(add_results(
-    "RandomForestClassifier",
-    grid_search_rf.best_score_,
-    "GridSearchCV",
-    grid_search_rf.best_params_
-))
+results.append(add_results
+    (
+        8,
+        "RandomForestClassifier",
+        grid_search_rf.best_score_,
+        "GridSearchCV",
+        grid_search_rf.best_params_
+    )
+)
 
 # -------------------------------------------------
 
@@ -408,6 +403,7 @@ results.sort(key=lambda e: e["Accuracy"], reverse=True)  # Descending order
 
 # Print the result rows
 for r in results:
+    print(f'{r["ID"]:<{column_with}}', end="\t\t")
     print(f'{r["Classifier"]:<{column_with}}', end="\t\t")
     print(f"{r['Accuracy']:.2f} %".ljust(column_with), end="\t\t")
     print(f'{r["Tuning Tool"]:<{column_with}}', end="\t\t")
