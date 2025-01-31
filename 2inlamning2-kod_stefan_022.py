@@ -35,6 +35,12 @@ from scipy.stats import randint
 # Save timestamp
 start_time = time.time()
 
+# Set to True if more parameters are needed for the evaluation.
+# When set to False -> Time consumed = 4 min 58 sec on my computer //Stefan
+# False -> faster
+# True -> slower, better
+high_parameter_values = False
+
 ################################################################################################################################
 def add_results(classif, accur, tune_tool = '', best_params= ''):
     """
@@ -175,7 +181,10 @@ y_test = test.drop(labels=['Id', 'Heading'], axis=1)
 #####################################################
 #  PART 1 A: CHOOSE A CLASSIFIER. LogisticRegression
 #####################################################
-clf = MultiOutputClassifier(LogisticRegression(max_iter=500)) # TODO raise the max_iter value //////////////////////////////////////
+if(high_parameter_values):
+    clf = MultiOutputClassifier(LogisticRegression(max_iter=1000)) 
+else:
+    clf = MultiOutputClassifier(LogisticRegression(max_iter=500))
 clf.fit(x_train, y_train)
 # -------------------------------------------------
 
@@ -183,7 +192,11 @@ clf.fit(x_train, y_train)
 ########################################################
 #  PART 1 B: CHOOSE A CLASSIFIER. RandomForestClassifier
 ########################################################
-estimators = 100 # TODO raise the estimators value //////////////////////////////////////
+if(high_parameter_values):
+    estimators = 100
+else:
+    estimators = 200
+
 clf_rf = RandomForestClassifier(n_estimators=estimators)
 # -------------------------------------------------
 
@@ -191,7 +204,11 @@ clf_rf = RandomForestClassifier(n_estimators=estimators)
 ######################################################
 #  PART 1 C: CHOOSE A CLASSIFIER. KNeighborsClassifier
 ######################################################
-clf_knn = KNeighborsClassifier(n_neighbors=5)
+if(high_parameter_values):
+    clf_knn = KNeighborsClassifier(n_neighbors=5)
+else:
+    clf_knn = KNeighborsClassifier(n_neighbors=9)
+
 # -------------------------------------------------
 
 
@@ -243,7 +260,12 @@ results.append(add_results("LogisticRegression", grid.best_score_, "GridSearchCV
 param_dist = {'estimator__C': [0.1, 1, 10], 'estimator__penalty': ['l1', 'l2']}
 logreg = LogisticRegression(solver='liblinear')  # 'liblinear' supports L1 and L2 penalties
 multi_logreg = MultiOutputClassifier(logreg)
-random_search = RandomizedSearchCV(multi_logreg, param_distributions=param_dist, n_iter=10, cv=5, scoring='accuracy', random_state=42) # TODO change cv to 5+ and n_iter to higher
+
+if(high_parameter_values):
+    random_search = RandomizedSearchCV(multi_logreg, param_distributions=param_dist, n_iter=20, cv=10, scoring='accuracy', random_state=42)
+else:
+        random_search = RandomizedSearchCV(multi_logreg, param_distributions=param_dist, n_iter=10, cv=5, scoring='accuracy', random_state=42)
+
 random_search.fit(x_train, y_train)
 results.append(add_results("LogisticRegression", random_search.best_score_, "RandomizedSearchCV", random_search.best_params_))
 
@@ -262,7 +284,10 @@ knn = KNeighborsClassifier()
 multi_knn = MultiOutputClassifier(knn)
 
 # Perform GridSearchCV
-grid_knn = GridSearchCV(multi_knn, param_grid_knn, cv=2, scoring='accuracy')  # TODO change cv to 5+
+if(high_parameter_values):
+    grid_knn = GridSearchCV(multi_knn, param_grid_knn, cv=5, scoring='accuracy')
+else:
+    grid_knn = GridSearchCV(multi_knn, param_grid_knn, cv=10, scoring='accuracy')
 grid_knn.fit(x_train, y_train)
 
 # Store the results
@@ -309,25 +334,44 @@ results.append(add_results(
 # RandomForestClassifier, GridSearchCV ##################################################################
 
 # Define parameter grid for GridSearchCV
-param_grid_rf = {
-    'n_estimators': [100, 200, 300],  # Number of trees
-    'max_depth': [None, 10, 20, 30],  # Maximum depth
-    'min_samples_split': [2, 5, 10],  # Minimum number of samples to split
-    'min_samples_leaf': [1, 2, 4],  # Minimum samples per leaf
-    'bootstrap': [True, False]  # Whether bootstrap samples are used
-}
+if(high_parameter_values):
+    param_grid_rf = {
+        'n_estimators': [100, 200, 300],  # Number of trees
+        'max_depth': [None, 10, 20, 30],  # Maximum depth
+        'min_samples_split': [2, 5, 10],  # Minimum number of samples to split
+        'min_samples_leaf': [1, 2, 4],  # Minimum samples per leaf
+    }
+else:
+    param_grid_rf = {
+        'n_estimators': [100, 200],  # Number of trees
+        'max_depth': [None, 10, 20],  # Maximum depth
+        'min_samples_split': [2, 5],  # Minimum number of samples to split
+        'min_samples_leaf': [1, 2],  # Minimum samples per leaf
+        'bootstrap': [True, False]  # Whether bootstrap samples are used
+    }
 
 # Initialize the base RandomForestClassifier
 clf_rf_base = RandomForestClassifier(random_state=42)
 
 # GridSearchCV setup
-grid_search_rf = GridSearchCV(
-    clf_rf_base,
-    param_grid=param_grid_rf,
-    cv=5,  # 5-fold cross-validation
-    scoring='accuracy',
-    n_jobs=-1  # Use all available cores
-)
+if(high_parameter_values):
+    grid_search_rf = GridSearchCV(
+        clf_rf_base,
+        param_grid=param_grid_rf,
+        cv=10,  # 5-fold cross-validation
+        scoring='accuracy',
+        n_jobs=-1  # Use all available cores
+    )
+else:
+    grid_search_rf = GridSearchCV(
+        clf_rf_base,
+        param_grid=param_grid_rf,
+        cv=5,  # 5-fold cross-validation
+        scoring='roc_auc',
+        n_jobs=-1  # Use all available cores
+    )
+
+
 
 # Fit the GridSearchCV model
 grid_search_rf.fit(x_train, y_train)
