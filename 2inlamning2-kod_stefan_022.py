@@ -221,6 +221,7 @@ if(high_parameter_values):
     clf = MultiOutputClassifier(LogisticRegression(max_iter=1000)) 
 else:
     clf = MultiOutputClassifier(LogisticRegression(max_iter=500))
+    
 clf.fit(x_train, y_train)
 # -------------------------------------------------
 
